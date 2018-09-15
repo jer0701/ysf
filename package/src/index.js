@@ -6,11 +6,10 @@
 //     </div>
 // )
 
-import {React} from './ysf/createElement';
-import {ReactDOM} from './ysf/render';
-import {Component} from './ysf/component';
+import React from './ysf';
+import ReactDOM from './ysf';
 
-class FuckApp extends Component {
+class FuckApp extends React.Component {
     constructor(props) {
         super(props);
         setInterval(function(){
@@ -25,7 +24,10 @@ class FuckApp extends Component {
         color: 'red'
     }
     render() {
-        return <div style={{height: '100px', width: '100px', background: this.state.color}} className='I am FuckApp component'></div>
+        return (<div style={{height: '100px', width: '100px', background: this.state.color, color: '#fff'}} className='I am FuckApp component'>
+           11111
+            <div>2222</div>
+        </div>)
     }
 }
 
