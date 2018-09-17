@@ -3,7 +3,7 @@ import { flattenChildren } from './createElement';
 
 function render(Vnode, container, isUpdate) {
     if(!Vnode) return;
-   
+  
     const {type, props} = Vnode;
     //if (!type) return; // 使用 flattenChildren 之后，文字节点也有 type 了
     const {children} = props;
@@ -23,19 +23,13 @@ function render(Vnode, container, isUpdate) {
     if(children) {
         props.children = mountChildren(children, domNode); //flatten 之后的 child 要保存下来方便 updateChild
     }
-    
-    if (isUpdate) {
-        console.log(container);
-        if(Vnode._hostNode) {
-            container.removeChild(Vnode._hostNode);
-        }
-        console.log(container)
-        container.appendChild(domNode);
-    } else {
-        container.appendChild(domNode)
-    }
 
     Vnode._hostNode = domNode; //用于在更新时期oldVnode的时候获取_hostNode
+    if(isUpdate) {
+        return domNode;
+    } else {
+        container.appendChild(domNode);
+    }
     return domNode;
 }
 
@@ -58,7 +52,7 @@ function mountChildren(children, parentDomNode) {
     if(!children) return;
     let childType = typeNumber(children);
     let flattenChildList = children;
- 
+  
     if(childType === 3 || children == 4) { // children 是文本节点
         flattenChildList = flattenChildren(flattenChildList)
         render(flattenChildList, parentDomNode)
@@ -111,7 +105,13 @@ function update(oldVnode, newVnode, parentDomNode) {
     } else {
         //remove
         /**整个元素都不同了，直接删除再插入一个新的 */
-        render(newVnode, parentDomNode, true);
+        let dom = render(newVnode, parentDomNode, true);
+        if(newVnode._hostNode) {
+            parentDomNode.removeChild(newVnode._hostNode);
+        } else {
+            parentDomNode.appendChild(dom)
+        }
+        
     }
 
     return newVnode;

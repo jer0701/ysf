@@ -10,25 +10,25 @@ import React from './ysf';
 import ReactDOM from './ysf';
 
 class FuckApp extends React.Component {
-    constructor() {
-        super()
-        this.state = {
-          counter: 1
-        }
-        setTimeout(() => {
-          this.setState({ counter: this.state.counter + 2 })
-        }, 1500);
+  constructor() {
+      super()
+      this.state = {
+        counter: 1
       }
-      render() {
-        return (
-          
-          <div style={{ height: `${10 * this.state.counter}px`, border: '1px solid black', transition: 'all 0.2s' }}>
-          {this.state.counter}
-          {this.state.counter === 1 ? '222' : '444'}
-            {this.state.counter === 1 ? <p></p> : <p>1</p>}
+      setTimeout(() => {
+        this.setState({ counter: this.state.counter + 2 })
+      }, 1500);
+    }
+    render() {
+
+      return (
+        <div key={1} style={{background:`rgb(99,99,${this.state.counter + 1})`}}>
+          <div>{[1,2,3].map((el,index)=>{ return (<span key={"x"+index}>{el}</span>)  })}
+          sss
           </div>
-        )
-      }
+        </div>
+      )
+    }
 }
 
 // ReactDOM.render(
@@ -49,6 +49,6 @@ class FuckApp extends React.Component {
 //    document.getElementById('root')
 // )
 ReactDOM.render(
-    <FuckApp />,
-    document.getElementById('root')
- )
+  <FuckApp />,
+  document.getElementById('root')
+)

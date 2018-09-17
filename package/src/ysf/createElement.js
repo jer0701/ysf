@@ -40,14 +40,21 @@ function flattenChildren(children) { // 多个平级子节点
     let childType = typeNumber(children),
         childArr = [];
 
-    if(childType == 4) { // 文字节点
+    if(childType == 3 || childType == 4) { // 文字节点
         return new Vnode('#text', children, null, null);
     }
     
     if(childType != 7) return children; //如果子节点不是数组列表，就不用下一步了
 
     children.forEach((item) => {
-        childArr.push(item);
+        if(typeNumber(item) === 7){ // 可能子节点也是一个Vnode列表
+            item.forEach((item)=>{
+                childArr.push(item)
+            })
+        } else {
+            childArr.push(item);
+        }
+        
     });
 
     childArr = childArr.map(item => {
@@ -56,7 +63,7 @@ function flattenChildren(children) { // 多个平级子节点
         }
         return item;
     })
-
+  
     return childArr;
     
 }
