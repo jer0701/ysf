@@ -44,7 +44,7 @@ function flattenChildren(children) { // 多个平级子节点
         return new Vnode('#text', children, null, null);
     }
     
-    if(childType != 7) return children; //如果子节点不是数组列表，就不用进来这里了
+    if(childType != 7) return children; //如果子节点不是数组列表，就不用下一步了
 
     children.forEach((item) => {
         childArr.push(item);
