@@ -10,25 +10,22 @@ import React from './ysf';
 import ReactDOM from './ysf';
 
 class FuckApp extends React.Component {
-    constructor(props) {
-        super(props);
-        setInterval(function(){
-            const color = ['#eee', 'black', 'red', 'green', 'blue', 'grey', '#133234', '#123213', '#222345', '#998232'];
-            const rand = parseInt(Math.min(10, Math.random()*10));
-            this.setState({
-                color: color[rand]
-            })
-        }.bind(this),1000);
-    }
-    state = {
-        color: 'red'
-    }
-    render() {
-        return (<div style={{height: '100px', width: '100px', background: this.state.color, color: '#fff'}} className='I am FuckApp component'>
-           11111
-            <div>2222</div>
-        </div>)
-    }
+    constructor() {
+        super()
+        this.state = {
+          counter: 1
+        }
+        setTimeout(() => {
+          this.setState({ counter: this.state.counter + 2 })
+        }, 1500);
+      }
+      render() {
+        return (
+          <div style={{ height: `${10 * this.state.counter}px`, border: '1px solid black', transition: 'all 0.2s' }}>
+            {this.state.counter === 1 ? <p>1</p> : <h1>1</h1>}
+          </div>
+        )
+      }
 }
 
 // ReactDOM.render(

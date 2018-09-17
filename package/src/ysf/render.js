@@ -1,10 +1,11 @@
-function render(Vnode, container) {
+import { typeNumber } from "./utils";
+
+function render(Vnode, container, isUpdate) {
     if(!Vnode) return;
    
     const {type, props} = Vnode;
     if (!type) return;
     const {children} = props;
-    console.log(children);
 
     let domNode;
     const VnodeType = typeof type;
@@ -19,7 +20,15 @@ function render(Vnode, container) {
     mountChildren(children, domNode);
 
     Vnode._hostNode = domNode
-    container.appendChild(domNode);
+
+    if (isUpdate) {
+        console.log(container)
+        container.removeChild()
+        console.log(container)
+        container.appendChild(domNode)
+    } else {
+        container.appendChild(domNode)
+    }
     return domNode;
 }
 
@@ -39,10 +48,15 @@ function mapProps(domNode,props) {
 
 function mountChildren(children, domNode) {
     if(!children) return;
-    let childType = typeof children;
+    let childType = typeNumber(children);
 
-    if(childType === 'string') { // children 是文本节点
+    if(childType === 4) { // children 是文本节点
         domNode.textContent = children;
+        return;
+    }  else if (childType == 7){
+        children.forEach(item => {
+            render(item, domNode);
+        })
         return;
     }
     render(children, domNode);
@@ -57,15 +71,20 @@ function renderComponent(Vnode, parentDomNode) {
     const domNode = render(renderedVnode, parentDomNode);
 
     instance.Vnode = renderedVnode;
+    instance.parentDomNode = parentDomNode;
+
     return domNode;
 }
 
-function update(oldVnode, newVnode) {
+function update(oldVnode, newVnode, parentDomNode) {
     if(!oldVnode.type) return;
     if(oldVnode.type === newVnode.type) {
         mapProps(oldVnode._hostNode, newVnode.props);
     } else {
         //remove
+        /**整个元素都不同了，直接删除再插入一个新的 */
+        render(newVnode, parentDomNode, true);
     }
 }
 export { render , update }
+

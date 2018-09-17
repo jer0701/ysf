@@ -7,19 +7,22 @@ class Component {
         this.nextState = null;
     }
 
-    updateComponent(instance, oldVnode, newVnode) {
-        update(oldVnode, newVnode)
+    updateComponent() {
+        const preState = this.state;
+        if(this.nextState !== preState) {
+            this.state = this.nextState;
+        }
+
+        this.nextState = null;
+        const oldVnode = this.Vnode; // 在renderComponent 记录了一个Vnode
+        const newVnode = this.render();
+   
+        update(oldVnode, newVnode, this.parentDomNode);
     }
 
     setState(partialState) {
-        const preState = this.state;
         this.nextState = {...this.state, ...partialState};
-        this.state = this.nextState;
-
-        const oldVnode = this.Vnode;
-        const newVnode = this.render();
-
-        this.updateComponent(this, oldVnode, newVnode);
+        this.updateComponent();
     }
 
     render(){}
