@@ -1,19 +1,22 @@
 import { typeNumber } from "./utils";
+import { flattenChildren } from './createElement';
 
 function render(Vnode, container, isUpdate) {
     if(!Vnode) return;
    
     const {type, props} = Vnode;
-    if (!type) return;
+    //if (!type) return; // 使用 flattenChildren 之后，文字节点也有 type 了
     const {children} = props;
 
     let domNode;
     const VnodeType = typeof type;
    
-    if(VnodeType === 'string') { // 原生dom
-        domNode = document.createElement(type);
-    } else { // 组件
+    if(VnodeType === 'string' && type === '#text') { // 文字节点
+        domNode = document.createTextNode(Vnode.props);
+    } else if(VnodeType === 'function'){ // 组件
         domNode = renderComponent(Vnode, container);
+    } else { // 原生dom
+        domNode = document.createElement(type);
     }
    
     mapProps(domNode, props);
@@ -54,7 +57,9 @@ function mountChildren(children, domNode) {
         domNode.textContent = children;
         return;
     }  else if (childType == 7){
-        children.forEach(item => {
+        var flattenChildList = flattenChildren(children);
+        console.log(flattenChildList);
+        flattenChildList.forEach(item => {
             render(item, domNode);
         })
         return;
