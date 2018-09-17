@@ -28,12 +28,12 @@ function render(Vnode, container, isUpdate) {
         console.log(container)
         container.removeChild(Vnode._hostNode)
         console.log(container)
-        container.appendChild(domNode)
+        container.appendChild(domNode);
     } else {
         container.appendChild(domNode)
     }
 
-    Vnode._hostNode = domNode
+    Vnode._hostNode = domNode; //用于在更新时期oldVnode的时候获取_hostNode
     return domNode;
 }
 
@@ -51,24 +51,24 @@ function mapProps(domNode,props) {
     }
 }
 
-function mountChildren(children, domNode) {
+
+function mountChildren(children, parentDomNode) {
     if(!children) return;
     let childType = typeNumber(children);
     let flattenChildList = children;
-
+ 
     if(childType === 4) { // children 是文本节点
-        domNode.textContent = children;
-        return;
+        flattenChildList = flattenChildren(flattenChildList)
+        render(flattenChildList, parentDomNode)
     }  else if (childType === 7){
         flattenChildList = flattenChildren(children);
         flattenChildList.forEach(item => {
-            render(item, domNode);
+            render(item, parentDomNode);
         })
-        return;
     } else if (childType === 8) {
-        render(children, domNode);
+        render(flattenChildList, parentDomNode);
     }
-
+   
     return flattenChildList; // 将这个新的 children 返回
 }
 
@@ -130,7 +130,7 @@ function updateChild(oldChild, newChild, parentDomNode) {
     for(let i = 0; i < maxlen; i++) {
         const oldChildVnode = oldChild[i];
         const newChildVnode = newChild[i];
-
+       
         if(oldChildVnode._hostNode) {
             newChildVnode._hostNode = oldChildVnode._hostNode;
         }
@@ -144,7 +144,7 @@ function updateChild(oldChild, newChild, parentDomNode) {
             //如果类型都不一样了，直接替换
             render(newChildVnode,parentDomNode,true)
             if (typeof newChildVnode.type === 'string') { 
-                console.log(oldChildVnode)
+                //console.log(oldChildVnode)
                 
             }
             if (typeof newChildVnode.type === 'function') {//非原生

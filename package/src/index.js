@@ -22,7 +22,8 @@ class FuckApp extends React.Component {
       render() {
         return (
           <div style={{ height: `${10 * this.state.counter}px`, border: '1px solid black', transition: 'all 0.2s' }}>
-         
+          111
+          {this.state.counter === 1 ? '222' : '333'}
             {this.state.counter === 1 ? <p>1</p> : <h1>1</h1>}
           </div>
         )

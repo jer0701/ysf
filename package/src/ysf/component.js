@@ -16,8 +16,9 @@ class Component {
         this.nextState = null;
         const oldVnode = this.Vnode; // 在renderComponent 记录了一个Vnode
         const newVnode = this.render();
-   
-        update(oldVnode, newVnode, this.parentDomNode);
+        console.log(oldVnode);
+        this.Vnode = update(oldVnode, newVnode, this.parentDomNode); // 返回一个新的Vnode
+        console.log(this.Vnode);
     }
 
     setState(partialState) {
