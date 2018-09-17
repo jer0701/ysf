@@ -20,12 +20,9 @@ class FuckApp extends React.Component {
       }, 1500);
     }
     render() {
-
       return (
-        <div key={1} style={{background:`rgb(99,99,${this.state.counter + 1})`}}>
-          <div>{[1,2,3].map((el,index)=>{ return (<span key={"x"+index}>{el}</span>)  })}
-          sss
-          </div>
+        <div>
+          {this.state.counter == 1 ? (<div>{[1,2,3].map((el)=>{ return (<span key={el}>{el}</span>)})}</div>):(<div>{[3,2,1].map((el)=>{ return (<span key={el}>{el}</span>)})}</div>)}
         </div>
       )
     }
@@ -48,7 +45,9 @@ class FuckApp extends React.Component {
 //     </div>,
 //    document.getElementById('root')
 // )
+
 ReactDOM.render(
   <FuckApp />,
   document.getElementById('root')
 )
+

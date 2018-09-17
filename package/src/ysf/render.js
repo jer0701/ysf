@@ -1,6 +1,11 @@
 import { typeNumber } from "./utils";
 import { flattenChildren } from './createElement';
 
+let mountIndex = 0;
+function mountIndexAdd() {
+    return mountIndex++;
+}
+
 function render(Vnode, container, isUpdate) {
     if(!Vnode) return;
   
@@ -87,6 +92,10 @@ function update(oldVnode, newVnode, parentDomNode) {
     newVnode._hostNode = oldVnode._hostNode
     if(oldVnode.type === newVnode.type) {
         //mapProps(oldVnode._hostNode, newVnode.props); //节点如果有 children 也需要更新，所以不用这个了
+        if (oldVnode.type === "#text") {
+            updateText(oldVnode, newVnode);
+            return newVnode
+        }
         if(typeof oldVnode.type === 'string') { // 原生dom
             // 先更新css
             const nextStyle = newVnode.props.style;
@@ -117,6 +126,24 @@ function update(oldVnode, newVnode, parentDomNode) {
     return newVnode;
 }
 
+function isSameVnode(pre, next) {
+    if(pre.type === next.type && pre.key === next.key) {
+        return true;
+    }
+    return false;
+}
+
+function mapKeyToInedex(old) {
+    let hash = {};
+    old.forEach((el, index) => {
+        if(el.key) {
+            hash[el.key] = index;
+        }
+    });
+
+    return hash;
+}
+
 function updateChild(oldChild, newChild, parentDomNode) {
     newChild = flattenChildren(newChild);
     
@@ -128,34 +155,113 @@ function updateChild(oldChild, newChild, parentDomNode) {
         newChild = [newChild]
     }
 
-    let maxlen = Math.max(oldChild.length, newChild.length);
-    for(let i = 0; i < maxlen; i++) {
-        const oldChildVnode = oldChild[i];
-        const newChildVnode = newChild[i];
-        
-        // 当节点变多和变少的时候，可能会造成节点数量不相同的情况
-        // 此时就会出现length不相等
-        if(newChildVnode && oldChildVnode) {
-            if(oldChildVnode._hostNode) {
-                newChildVnode._hostNode = oldChildVnode._hostNode;
-            }
-            if (oldChildVnode.type === newChildVnode.type) {
-                if (oldChildVnode.type === '#text') {
-                    updateText(oldChildVnode, newChildVnode, parentDomNode)
-                }else{
-                    update(oldChildVnode, newChildVnode, oldChildVnode._hostNode)
-                }
-            } else {
-                //如果类型都不一样了，直接替换
-                render(newChildVnode, parentDomNode,true)
-            }
-        } else if (newChildVnode && !oldChildVnode) {
-            render(newChildVnode, parentDomNode,true)
-        } else if ( !newChildVnode && oldChildVnode) {
-            parentDomNode.removeChild(oldChildVnode._hostNode)
-        }
-        
+    let oldLength = oldChild.length,
+        newLength = newChild.length,
+        oldStartIndex = 0,
+        newStartIndex = 0,
+        oldEndIndex = oldLength - 1,
+        newEndIndex = newLength - 1,
+        oldStartVnode = oldChild[0],
+        newStartVnode = newChild[0],
+        oldEndVnode = oldChild[oldEndIndex],
+        newEndVnode = newChild[newEndIndex],
+        hash;
+    
+    // 新增子节点
+    if(newLength && !oldLength) {
+        newChild.forEach( newVnode => {
+            render(newVnode, parentDomNode);
+        });
+        return newChild;
     }
+
+    while(oldStartIndex <= oldEndIndex && newStartIndex <= newEndIndex) {
+        if(oldStartVnode === undefined || oldStartVnode === null) {
+            oldStartVnode = oldChild[++oldStartIndex];
+        } else if (oldEndVnode === undefined || oldEndVnode === null) {
+            oldEndVnode = oldChild[--oldEndIndex];
+        } else if (isSameVnode(oldStartVnode, newStartVnode)) {
+            update(oldStartVnode, newStartVnode, parentDomNode);
+            oldStartVnode = oldChild[++oldStartIndex];
+            newStartVnode = newChild[++newStartIndex];
+        } else if (isSameVnode(oldEndVnode, newEndVnode)) {
+            update(oldEndVnode, newEndVnode, parentDomNode);
+            oldEndVnode = oldChild[--oldEndIndex];
+            newEndVnode = newChild[--newEndIndex];
+        } else if (isSameVnode(oldStartVnode, newEndVnode)) {
+            console.log(1111);
+            update(oldStartVnode, newEndVnode, parentDomNode);
+            let dom = oldStartVnode._hostNode;
+       
+            parentDomNode.insertBefore(dom, oldEndVnode._hostNode.nextSibling);
+            oldStartVnode = oldChild[++oldStartIndex];
+            newEndVnode = newChild[--newEndIndex];
+        } else if (isSameVnode(oldEndVnode, newStartVnode)) {
+            update(oldEndVnode, newStartVnode, parentDomNode);
+            let dom = oldEndVnode._hostNode;
+            parentDomNode.insertBefore(dom, oldStartVnode._hostNode);
+            oldEndVnode = oldChild[--oldEndIndex];
+            newStartVnode = newChild[++newStartIndex];
+        } else {
+            if(hash === undefined) hash = mapKeyToInedex(oldChild);
+
+            let indexInOld = hash[newStartVnode.key];
+            if(indexInOld === undefined) {
+                let newEl = render(newStartVnode, parentDomNode, true);
+                parentDomNode.insertBefore(newElm, oldStartVnode._hostNode);
+                newStartVnode = newChild[++newStartIndex];
+            } else {
+                let moveVnode = oldChild[indexInOld];
+                update(moveVnode, newStartVnode, parentDomNode);
+                parentDomNode.insertBefore(moveVnode._hostNode, oldStartVnode._hostNode);
+                oldChild[indexInOld] = undefined;
+                newStartVnode = newChild[++newStartIndex];
+            }
+        }
+
+        if (oldStartIndex > oldEndIndex) {
+            
+            for (; newStartIndex-1 < newEndIndex; newStartIndex++) {
+                
+                if(newChild[newStartIndex]){
+                    render(newChild[newStartIndex], parentDomNode)
+                }
+            }
+            
+        } else if (newStartIndex > newEndIndex){
+            
+            for (; oldStartIndex -1 < oldEndIndex; oldStartIndex++) {
+                if(oldChild[oldStartIndex]){
+                    parentDomNode.removeChild(oldChild[oldStartIndex]._hostNode)
+                }
+            }
+        }
+    }
+
+    // let maxlen = Math.max(oldChild.length, newChild.length);
+    // for(let i = 0; i < maxlen; i++) {
+    //     const oldChildVnode = oldChild[i];
+    //     const newChildVnode = newChild[i];
+        
+    //     // 当节点变多和变少的时候，可能会造成节点数量不相同的情况
+    //     // 此时就会出现length不相等
+    //     if(newChildVnode && oldChildVnode) {
+    //         if(oldChildVnode._hostNode) {
+    //             newChildVnode._hostNode = oldChildVnode._hostNode;
+    //         }
+    //         if (oldChildVnode.type === newChildVnode.type) {
+    //             update(oldChildVnode, newChildVnode, oldChildVnode._hostNode)
+    //         } else {
+    //             //如果类型都不一样了，直接替换
+    //             render(newChildVnode, parentDomNode,true)
+    //         }
+    //     } else if (newChildVnode && !oldChildVnode) {
+    //         render(newChildVnode, parentDomNode,true)
+    //     } else if ( !newChildVnode && oldChildVnode) {
+    //         parentDomNode.removeChild(oldChildVnode._hostNode)
+    //     }
+        
+    // }
 
     return newChild;
 }
