@@ -51,12 +51,12 @@ function flattenChildren(children) { // 多个平级子节点
     });
 
     childArr = childArr.map(item => {
-        if(typeNumber(item) == 4) {
+        if(typeNumber(item) == 3 || typeNumber(item) == 4) {
             item = new Vnode('#text', item, null, null);
         }
         return item;
     })
-    console.log(childArr);
+
     return childArr;
     
 }

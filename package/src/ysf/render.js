@@ -25,8 +25,10 @@ function render(Vnode, container, isUpdate) {
     }
     
     if (isUpdate) {
-        console.log(container)
-        container.removeChild(Vnode._hostNode)
+        console.log(container);
+        if(Vnode._hostNode) {
+            container.removeChild(Vnode._hostNode);
+        }
         console.log(container)
         container.appendChild(domNode);
     } else {
@@ -57,7 +59,7 @@ function mountChildren(children, parentDomNode) {
     let childType = typeNumber(children);
     let flattenChildList = children;
  
-    if(childType === 4) { // children 是文本节点
+    if(childType === 3 || children == 4) { // children 是文本节点
         flattenChildList = flattenChildren(flattenChildList)
         render(flattenChildList, parentDomNode)
     }  else if (childType === 7){
@@ -130,27 +132,29 @@ function updateChild(oldChild, newChild, parentDomNode) {
     for(let i = 0; i < maxlen; i++) {
         const oldChildVnode = oldChild[i];
         const newChildVnode = newChild[i];
-       
-        if(oldChildVnode._hostNode) {
-            newChildVnode._hostNode = oldChildVnode._hostNode;
+        
+        // 当节点变多和变少的时候，可能会造成节点数量不相同的情况
+        // 此时就会出现length不相等
+        if(newChildVnode && oldChildVnode) {
+            if(oldChildVnode._hostNode) {
+                newChildVnode._hostNode = oldChildVnode._hostNode;
+            }
+            if (oldChildVnode.type === newChildVnode.type) {
+                if (oldChildVnode.type === '#text') {
+                    updateText(oldChildVnode, newChildVnode, parentDomNode)
+                }else{
+                    update(oldChildVnode, newChildVnode, oldChildVnode._hostNode)
+                }
+            } else {
+                //如果类型都不一样了，直接替换
+                render(newChildVnode, parentDomNode,true)
+            }
+        } else if (newChildVnode && !oldChildVnode) {
+            render(newChildVnode, parentDomNode,true)
+        } else if ( !newChildVnode && oldChildVnode) {
+            parentDomNode.removeChild(oldChildVnode._hostNode)
         }
-        if (oldChildVnode.type === newChildVnode.type) {
-            if (oldChildVnode.type === '#text') {
-                updateText(oldChildVnode, newChildVnode, parentDomNode)
-            }else{
-                update(oldChildVnode, newChildVnode, oldChildVnode._hostNode)
-            }
-        } else {
-            //如果类型都不一样了，直接替换
-            render(newChildVnode,parentDomNode,true)
-            if (typeof newChildVnode.type === 'string') { 
-                //console.log(oldChildVnode)
-                
-            }
-            if (typeof newChildVnode.type === 'function') {//非原生
-    
-            }
-        }
+        
     }
 
     return newChild;
