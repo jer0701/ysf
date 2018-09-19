@@ -1,10 +1,15 @@
-import { update } from './render';
+import { update } from './vdom';
 
 class Component {
     constructor(props) {
         this.props = props;
         this.state = this.state || {};
         this.nextState = null;
+    }
+
+    setState(partialState) {
+        this.nextState = {...this.state, ...partialState};
+        this.updateComponent();
     }
 
     updateComponent() {
@@ -20,11 +25,13 @@ class Component {
         this.Vnode = update(oldVnode, newVnode, this.parentDomNode); // 返回一个新的Vnode
         console.log(this.Vnode);
     }
-
-    setState(partialState) {
-        this.nextState = {...this.state, ...partialState};
-        this.updateComponent();
-    }
+    componentWillMount(){}
+    componentDidMount(){}
+    componentWillReceiveProps(){}
+    shouldComponentUpdate(){}
+    componentWillUpdate(){}
+    componentDidUpdate(){}
+    componentWillUnmount(){}
 
     render(){}
 }

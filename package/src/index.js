@@ -15,14 +15,19 @@ class FuckApp extends React.Component {
       this.state = {
         counter: 1
       }
-      setTimeout(() => {
-        this.setState({ counter: this.state.counter + 2 })
-      }, 1500);
+      // setTimeout(() => {
+      //   this.setState({ counter: this.state.counter + 2 })
+      // }, 1500);
+    }
+    click(e) {
+      this.setState({ counter: this.state.counter + 1 })
     }
     render() {
       return (
         <div>
           {this.state.counter == 1 ? (<div>{[1,2,3].map((el)=>{ return (<span key={el}>{el}</span>)})}</div>):(<div>{[3,2,1].map((el)=>{ return (<span key={el}>{el}</span>)})}</div>)}
+          <button onClick={this.click.bind(this)}>点我</button>
+          {this.state.counter}
         </div>
       )
     }

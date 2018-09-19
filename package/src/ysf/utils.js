@@ -24,3 +24,7 @@ export function typeNumber(data) {
     var a = numberMap[__type.call(data)];
     return a || 8;
 }
+
+export function isEventName(name) {
+    return /^on[A-Z]/.test(name);
+}
