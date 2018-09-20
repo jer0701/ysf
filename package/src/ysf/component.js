@@ -1,8 +1,9 @@
 import { update } from './vdom';
 
 class Component {
-    constructor(props) {
+    constructor(props, context) {
         this.props = props;
+        this.context = context;
         this.state = this.state || {};
         this.nextState = null;
     }
@@ -21,17 +22,17 @@ class Component {
         this.nextState = null;
         const oldVnode = this.Vnode; // 在renderComponent 记录了一个Vnode
         const newVnode = this.render();
-        console.log(oldVnode);
+    
         this.Vnode = update(oldVnode, newVnode, this.parentDomNode); // 返回一个新的Vnode
-        console.log(this.Vnode);
     }
-    componentWillMount(){}
-    componentDidMount(){}
-    componentWillReceiveProps(){}
-    shouldComponentUpdate(){}
-    componentWillUpdate(){}
-    componentDidUpdate(){}
-    componentWillUnmount(){}
+    
+    //componentWillMount(){}
+    //componentDidMount(){}
+    //componentWillReceiveProps(){}
+    //shouldComponentUpdate(){}
+    //componentWillUpdate(){}
+    //componentDidUpdate(){}
+    //componentWillUnmount(){}
 
     render(){}
 }

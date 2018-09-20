@@ -58,13 +58,23 @@ function mountChildren(children, parentDomNode) {
 function renderComponent(Vnode, parentDomNode) {
     const ComponentClass = Vnode.type;
     const {props} = Vnode;
-
+    
     const instance = new ComponentClass(props);
+
+    if(instance.componentWillMount) {
+        instance.componentWillMount();
+    }
     const renderedVnode = instance.render();
     const domNode = render(renderedVnode, parentDomNode);
 
+    if(instance.componentDidMount) {
+        instance.componentDidMount();
+    }
+
     instance.Vnode = renderedVnode;
     instance.parentDomNode = parentDomNode;
+
+    Vnode._instance = instance; //保存一个自己的实例便于更新
 
     return domNode;
 }
@@ -90,7 +100,7 @@ function update(oldVnode, newVnode, parentDomNode) {
             newVnode.props.children = updateChild(oldVnode.props.children, newVnode.props.children, newVnode._hostNode);
         }
         if(typeof oldVnode.type === 'function') { // 组件
-
+            updateComponent(oldVnode, newVnode);
         } 
 
     } else {
@@ -106,6 +116,52 @@ function update(oldVnode, newVnode, parentDomNode) {
     }
 
     return newVnode;
+}
+
+function updateComponent(oldComponentVnode, newComponentVnode) {
+    // const oldState = oldComponentVnode._instance.state;
+    // const oldProps = oldComponentVnode._instance.props;
+    // const oldContext = oldComponentVnode._instance.context;
+    const oldVnode = oldComponentVnode._instance.Vnode
+   
+    const newProps = newComponentVnode.props;
+    const newContext = newComponentVnode.context;
+    const newInstance = new newComponentVnode.type(newProps);
+    const newState = newInstance.state;
+
+    if(oldComponentVnode._instance.componentWillReceiveProps) {
+        oldComponentVnode._instance.componentWillReceiveProps(newProps, newContext);
+    }
+
+    if(oldComponentVnode._instance.shouldComponentUpdate) {
+        let shouldUpdate = oldComponentVnode._instance.shouldComponentUpdate(newProps, newState, newContext);
+        if (!shouldUpdate) {
+            //无论shouldComponentUpdate结果是如何，数据都会给用户设置上去
+            //但是不一定会刷新
+            oldComponentVnode._instance.props = newProps;
+            oldComponentVnode._instance.context = newContext;
+            newComponentVnode._instance = oldComponentVnode._instance;
+            return
+        }
+    }
+
+    if (oldComponentVnode._instance.componentWillUpdate) {
+        oldComponentVnode._instance.componentWillUpdate(newProps, newState, newContext);
+    }
+
+    
+    const newVnode = newInstance.render();
+    oldComponentVnode._instance.state = newState;
+    oldComponentVnode._instance.props = newProps;
+    oldComponentVnode._instance.context = newContext;
+    newComponentVnode._instance = oldComponentVnode._instance;
+   
+    update(oldVnode, newVnode, oldComponentVnode._hostNode);
+
+    if (oldComponentVnode._instance.componentDidUpdate) {
+        oldComponentVnode._instance.componentDidUpdate(newProps, newState, newContext);
+    }
+
 }
 
 function isSameVnode(pre, next) {
@@ -188,7 +244,7 @@ function updateChild(oldChild, newChild, parentDomNode) {
 
             let indexInOld = hash[newStartVnode.key];
             if(indexInOld === undefined) {
-                let newEl = render(newStartVnode, parentDomNode, true);
+                let newElm = render(newStartVnode, parentDomNode, true);
                 parentDomNode.insertBefore(newElm, oldStartVnode._hostNode);
                 newStartVnode = newChild[++newStartIndex];
             } else {
@@ -213,6 +269,12 @@ function updateChild(oldChild, newChild, parentDomNode) {
             
             for (; oldStartIndex -1 < oldEndIndex; oldStartIndex++) {
                 if(oldChild[oldStartIndex]){
+                    let removeNode = oldChild[oldStartIndex];
+                    if(typeof removeNode.type === 'function') {
+                        if(removeNode._instance.componentWillUnMount){
+                            removeNode._instance.componentWillUnMount();
+                        }
+                    }
                     parentDomNode.removeChild(oldChild[oldStartIndex]._hostNode)
                 }
             }
