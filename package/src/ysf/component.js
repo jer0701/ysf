@@ -6,11 +6,27 @@ class Component {
         this.context = context;
         this.state = this.state || {};
         this.nextState = null;
+        this.setStateQueue = [];
     }
 
     setState(partialState) {
-        this.nextState = {...this.state, ...partialState};
-        this.updateComponent();
+        //this.nextState = {...this.state, ...partialState};
+        this.enqueueSetState(partialState);
+        //this.updateComponent();
+    }
+
+    enqueueSetState(stateChange) {
+        if ( this.setStateQueue.length === 0 ) {
+            Promise.resolve().then( () => {
+                if (this.setStateQueue.length > 0) {
+                    this.nextState = { ...this.state }
+                    this.setStateQueue = []
+                    this.updateComponent()
+                }
+            } )
+        }
+        this.state = Object.assign({}, this.state, stateChange);
+        this.setStateQueue.push(this.state);
     }
 
     updateComponent() {

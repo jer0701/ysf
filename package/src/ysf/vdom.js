@@ -80,7 +80,6 @@ function renderComponent(Vnode, parentDomNode) {
 }
 
 function update(oldVnode, newVnode, parentDomNode) {
-    if(!oldVnode.type) return;
     newVnode._hostNode = oldVnode._hostNode
     if(oldVnode.type === newVnode.type) {
         //mapProps(oldVnode._hostNode, newVnode.props); //节点如果有 children 也需要更新，所以不用这个了
@@ -107,11 +106,10 @@ function update(oldVnode, newVnode, parentDomNode) {
         //remove
         /**整个元素都不同了，直接删除再插入一个新的 */
         let dom = render(newVnode, parentDomNode, true);
-        if(newVnode._hostNode) {
-            parentDomNode.removeChild(newVnode._hostNode);
-        } else {
-            parentDomNode.appendChild(dom)
+        if(oldVnode._hostNode) {
+            parentDomNode.removeChild(oldVnode._hostNode);
         }
+        parentDomNode.appendChild(dom);
         
     }
 

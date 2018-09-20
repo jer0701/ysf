@@ -8,7 +8,7 @@
 
 import React from './ysf';
 import ReactDOM from './ysf';
-
+// import { h, render, Component } from 'preact';
 class C extends React.Component {
   constructor(props) {
     super(props)
@@ -19,7 +19,7 @@ class C extends React.Component {
   }
   shouldComponentUpdate(nextProps, nextState) {
     console.log('shouldComponentUpdate');
-    return false;
+    return true;
   }
   componentWillReceiveProps(nextProps, nextContext) {
     console.log('目前的props:', this.props)
@@ -50,14 +50,27 @@ class FuckApp extends React.Component {
   constructor() {
       super()
       this.state = {
-        counter: 1
+        counter: 1,
+        val: 0
       }
       // setTimeout(() => {
       //   this.setState({ counter: this.state.counter + 2 })
       // }, 1500);
     }
     componentDidMount() {
-      console.log('组件挂载')
+      this.setState({val: this.state.val + 1});
+      console.log(this.state.val);    // 第 1 次 log
+  
+      this.setState({val: this.state.val + 1});
+      console.log(this.state.val);    // 第 2 次 log
+  
+      setTimeout(() => {
+        this.setState({val: this.state.val + 1});
+        console.log(this.state.val);  // 第 3 次 log
+  
+        this.setState({val: this.state.val + 1});
+        console.log(this.state.val);  // 第 4 次 log
+      }, 0);
     }
     componentWillMount() {
       console.log('将要挂载')
@@ -95,7 +108,7 @@ class FuckApp extends React.Component {
 //    document.getElementById('root')
 // )
 
-ReactDOM.render(
+React.render(
   <FuckApp />,
   document.getElementById('root')
 )
