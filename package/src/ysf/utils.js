@@ -28,3 +28,18 @@ export function typeNumber(data) {
 export function isEventName(name) {
     return /^on[A-Z]/.test(name);
 }
+
+export var options = {
+    updateBatchNumber: 1,
+    immune: {}
+}
+
+export function extend(obj, props) {
+    if (props) {
+        for (let i in props) {
+            if (props.hasOwnProperty(i)) 
+                obj[i] = props[i]
+        }
+    }
+    return obj
+}

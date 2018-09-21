@@ -1,0 +1,37 @@
+import {options} from './utils'
+var queue = [];
+
+export var transaction = {
+    isInTransation: false,
+    enqueue: function (instance) {
+        if (typeof instance === 'object') {
+            queue.push(instance)
+        }
+        if (!this.isInTransation) {
+            this.isInTransation = true
+
+            if (instance) options.updateBatchNumber++;
+            var globalBatchNumber = options.updateBatchNumber
+            //console.log(globalBatchNumber);
+            var renderQueue = queue
+            queue = []
+            var updateComponent = options.immune.updateComponent;
+           
+            for (var i = 0, n = renderQueue.length; i < n; i++) {
+                var inst = renderQueue[i]
+                
+                try {
+                    if (inst._updateBatchNumber === globalBatchNumber) {
+                        
+                        updateComponent(inst);
+                    }
+                } catch (e) {
+                    /* istanbul ignore next */
+                    console.warn(e)
+                }
+            }
+            this.isInTransation = false;
+        }
+
+    }
+}
