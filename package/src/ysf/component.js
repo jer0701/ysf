@@ -20,33 +20,33 @@ class Component {
     }
 
     setState(partialState) {
-        this.nextState = Object.assign({}, this.state, partialState)
-        //this.enqueueSetState(partialState);
+        //this.nextState = Object.assign({}, this.state, partialState)
+        this.enqueueSetState(partialState);
         //this.updateComponent();
-        if (this.lifeCycle === LifeCycle.CREATE) {
-            //组件挂载期
-          } else {
-            //组件更新期
-            if (this.lifeCycle === LifeCycle.MOUNTTING) {
-              //componentDidMount的时候调用setState
-              this.state = Object.assign({}, this.state, partialState)
-              this.setStateQueue.push(partialState);
-              return
-            }
+        // if (this.lifeCycle === LifeCycle.CREATE) {
+        //     //组件挂载期
+        // } else {
+        //     //组件更新期
+        //     if (this.lifeCycle === LifeCycle.MOUNTTING) {
+        //       //componentDidMount的时候调用setState
+        //       this.state = Object.assign({}, this.state, partialState)
+        //       this.setStateQueue.push(partialState);
+        //       return
+        //     }
 
-            if (options.async === true) {
-                //事件中调用
-                let dirty = options.dirtyComponent[this]
-                if (!dirty) {
-                  options.dirtyComponent[this] = this
-                }
-                return
-            }
+        //     if (options.async === true) {
+        //         //事件中调用
+        //         let dirty = options.dirtyComponent[this]
+        //         if (!dirty) {
+        //           options.dirtyComponent[this] = this
+        //         }
+        //         return
+        //     }
       
-            //不在生命周期中调用，有可能是异步调用
+        //     //不在生命周期中调用，有可能是异步调用
            
-            this.updateComponent()
-          }
+        //     this.updateComponent()
+        // }
         
     }
 
@@ -64,19 +64,19 @@ class Component {
         this.Vnode = update(oldVnode, newVnode, this.parentDomNode); // 返回一个新的Vnode
 
     }
-    // enqueueSetState(stateChange) {
-    //     if ( this.setStateQueue.length === 0 ) {
-    //         Promise.resolve().then( () => {
-    //             if (this.setStateQueue.length > 0) {
-    //                 this.nextState = { ...this.state }
-    //                 this.setStateQueue = []
-    //                 this.updateComponent()
-    //             }
-    //         } )
-    //     }
-    //     this.state = Object.assign({}, this.state, stateChange);
-    //     this.setStateQueue.push(this.state);
-    // }
+    enqueueSetState(stateChange) {
+        if ( this.setStateQueue.length === 0 ) {
+            Promise.resolve().then( () => {
+                if (this.setStateQueue.length > 0) {
+                    this.nextState = { ...this.state }
+                    this.setStateQueue = []
+                    this.updateComponent()
+                }
+            } )
+        }
+        this.state = Object.assign({}, this.state, stateChange);
+        this.setStateQueue.push(this.state);
+    }
    
     _updateInLifeCycle() {
         if (this.setStateQueue.length > 0) {
