@@ -30,8 +30,8 @@ export function isEventName(name) {
 }
 
 export var options = {
-    updateBatchNumber: 1,
-    immune: {}
+    async: false,
+    dirtyComponent: {}
 }
 
 export function extend(obj, props) {

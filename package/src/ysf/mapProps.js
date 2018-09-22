@@ -1,4 +1,4 @@
-import { isEventName } from "./utils";
+import { isEventName, options } from "./utils";
 
 function mapProps(domNode,props) {
     for(let propsName in props) {
@@ -38,7 +38,17 @@ function listenTo(domNode, fn, eventName) {
 
 function dispatchEvent(event) {
     const path = getEventPath(event);
+
+    options.async = true
+
     triggerEventByPath(path)//触发event默认以冒泡形式
+
+    options.async = false
+    
+    for(let dirty in options.dirtyComponent){
+        options.dirtyComponent[dirty].updateComponent()
+    }
+    options.dirtyComponent = {}//清空
 }
 
 function getEventPath(event) {

@@ -1,6 +1,7 @@
-import { typeNumber } from "./utils";
+import { typeNumber, options } from "./utils";
 import { flattenChildren } from './createElement';
 import { mapProps } from './mapProps';
+import { LifeCycle } from './component'
 
 function render(Vnode, container, isUpdate) {
     if(!Vnode) return;
@@ -61,20 +62,23 @@ function renderComponent(Vnode, parentDomNode) {
     
     const instance = new ComponentClass(props);
 
-    if(instance.componentWillMount) {
+    if(instance.componentWillMount) { 
         instance.componentWillMount();
     }
     const renderedVnode = instance.render();
+    instance.lifeCycle = LifeCycle.MOUNTTING;
     const domNode = render(renderedVnode, parentDomNode);
-
+    
     if(instance.componentDidMount) {
         instance.componentDidMount();
+        instance.lifeCycle = LifeCycle.MOUNT
     }
-
+    
     instance.Vnode = renderedVnode;
     instance.parentDomNode = parentDomNode;
 
     Vnode._instance = instance; //保存一个自己的实例便于更新
+    instance._updateInLifeCycle()
 
     return domNode;
 }
@@ -147,7 +151,6 @@ function updateComponent(oldComponentVnode, newComponentVnode) {
         oldComponentVnode._instance.componentWillUpdate(newProps, newState, newContext);
     }
 
-    
     const newVnode = newInstance.render();
     oldComponentVnode._instance.state = newState;
     oldComponentVnode._instance.props = newProps;

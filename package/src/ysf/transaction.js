@@ -9,7 +9,7 @@ export var transaction = {
         }
         if (!this.isInTransation) {
             this.isInTransation = true
-
+            console.log(queue);
             if (instance) options.updateBatchNumber++;
             var globalBatchNumber = options.updateBatchNumber
             //console.log(globalBatchNumber);
@@ -19,7 +19,7 @@ export var transaction = {
            
             for (var i = 0, n = renderQueue.length; i < n; i++) {
                 var inst = renderQueue[i]
-                
+                console.log(inst);
                 try {
                     if (inst._updateBatchNumber === globalBatchNumber) {
                         
